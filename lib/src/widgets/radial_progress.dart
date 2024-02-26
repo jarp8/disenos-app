@@ -1,12 +1,24 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 class RadialProgress extends StatefulWidget {
 
   final double porcentaje;
+  final Color colorPrimario;
+  final Color colorSecundario;
+  final double grosorPrimario;
+  final double grosorSecundario;
 
-  const RadialProgress({super.key, required this.porcentaje});
+  const RadialProgress({
+    super.key,
+    required this.porcentaje,
+    this.colorPrimario = Colors.blue,
+    this.colorSecundario = Colors.grey,
+    this.grosorPrimario = 10,
+    this.grosorSecundario = 4,
+  });
 
   @override
   State<RadialProgress> createState() => _RadialProgressState();
@@ -48,7 +60,11 @@ class _RadialProgressState extends State<RadialProgress> with SingleTickerProvid
           height: double.infinity,
           child: CustomPaint(
             painter: _MyRadialProgress(
-              porcentaje: (widget.porcentaje - diferenciaAnimar) + (diferenciaAnimar * controller.value)
+              porcentaje: (widget.porcentaje - diferenciaAnimar) + (diferenciaAnimar * controller.value),
+              colorPrimario: widget.colorPrimario,
+              colorSecundario: widget.colorSecundario,
+              grosorPrimario: widget.grosorPrimario,
+              grosorSecundario: widget.grosorSecundario,
             ),
           ),
         );
@@ -60,16 +76,36 @@ class _RadialProgressState extends State<RadialProgress> with SingleTickerProvid
 
 class _MyRadialProgress extends CustomPainter {
   final double porcentaje;
+  final Color colorPrimario;
+  final Color colorSecundario;
+  final double grosorPrimario;
+  final double grosorSecundario;
 
-  _MyRadialProgress({required this.porcentaje});
+  _MyRadialProgress({
+    required this.porcentaje,
+    required this.colorPrimario,
+    required this.colorSecundario,
+    required this.grosorPrimario,
+    required this.grosorSecundario,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
+    final Rect rect = Rect.fromCircle(
+      center: const Offset(0, 0),
+      radius: 180
+    );
+
+    const Gradient gradiente = LinearGradient(colors: [
+      Color(0xffc012ff),
+      Color(0xff6b05e8),
+      Colors.red
+    ]);
 
     // Circulo completado
     final paint = Paint()
-      ..strokeWidth = 4
-      ..color = Colors.grey
+      ..strokeWidth = grosorSecundario
+      ..color = colorSecundario
       ..style = PaintingStyle.stroke;
 
       final center = Offset(size.width * 0.5, size.height * 0.5);
@@ -79,8 +115,10 @@ class _MyRadialProgress extends CustomPainter {
 
       // Arco
       final paintArco = Paint()
-        ..strokeWidth = 10
-        ..color = Colors.pink
+        ..strokeWidth = grosorPrimario
+        // ..color = colorPrimario
+        ..shader = gradiente.createShader(rect)
+        ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
       // Parte que se deberà ir llenando
@@ -96,5 +134,4 @@ class _MyRadialProgress extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-
 }
